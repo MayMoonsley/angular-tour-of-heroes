@@ -54,11 +54,28 @@ export class HeroService {
   }
 
   updateHero(hero: Hero): Observable<any> {
-    return this.http.put(this.heroesUrl, hero, this.httpOptions)
+    return this.http.put<Hero>(this.heroesUrl, hero, this.httpOptions)
         .pipe(
             tap(_ => `updated hero id=${hero.id}`),
-            catchError(this.handleError<any>('updateHero'))
+            catchError(this.handleError<Hero>('updateHero'))
         );
+  }
+
+  searchHeroes(term: string): Observable<Hero[]> {
+    if (term.trim() === '') {
+        return of([]);
+    } else {
+        return this.http.get<Hero[]>(`${this.heroesUrl}/?name=${term}`).pipe(
+            tap(x => {
+                if (x.length > 0) {
+                    this.log(`found heroes matching term ${term}`);
+                } else {
+                    this.log(`no heroes matching term ${term}`);
+                }
+            }),
+            catchError(this.handleError<Hero[]>('searchHeroes'))
+        );
+    }
   }
 
   private handleError<T>(operation = 'operation', result?: T) {
