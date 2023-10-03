@@ -16,6 +16,10 @@ export class HeroService {
 
   private heroesUrl = 'api/heroes'; // is there a reason the tutorial didn't say to make this const?
 
+  httpOptions = {
+    headers: new HttpHeaders({ 'Content-Type': 'application/json' })
+  }; // it didn't say to make this one private *or* const. what's up with that?
+
   getHeroes(): Observable<Hero[]> {
     return this.http.get<Hero[]>(this.heroesUrl)
         .pipe(
@@ -30,6 +34,22 @@ export class HeroService {
         .pipe(
             tap(_ => this.log(`fetched hero id=${id}`)),
             catchError(this.handleError<Hero>(`getHero id=${id}`))
+        );
+  }
+
+  addHero(hero: Hero): Observable<Hero> {
+    return this.http.post<Hero>(this.heroesUrl, hero, this.httpOptions)
+        .pipe(
+            tap((newHero: Hero) => this.log(`added hero with id=${newHero.id}`)),
+            catchError(this.handleError<Hero>('addHero'))
+        )
+  }
+
+  updateHero(hero: Hero): Observable<any> {
+    return this.http.put(this.heroesUrl, hero, this.httpOptions)
+        .pipe(
+            tap(_ => `updated hero id=${hero.id}`),
+            catchError(this.handleError<any>('updateHero'))
         );
   }
 
